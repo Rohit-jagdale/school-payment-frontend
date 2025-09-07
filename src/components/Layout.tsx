@@ -3,7 +3,6 @@ import type { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   HomeIcon, 
-  ChartBarIcon, 
   BuildingOfficeIcon, 
   MagnifyingGlassIcon,
   SunIcon,
@@ -24,7 +23,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: HomeIcon },
-    { name: 'Transactions', href: '/transactions', icon: ChartBarIcon },
     { name: 'By School', href: '/transactions/school', icon: BuildingOfficeIcon },
     { name: 'Status Check', href: '/status-check', icon: MagnifyingGlassIcon },
   ];

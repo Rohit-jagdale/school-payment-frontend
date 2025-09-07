@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
@@ -8,7 +7,6 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
-import Transactions from './pages/Transactions';
 import SchoolTransactions from './pages/SchoolTransactions';
 import StatusCheck from './pages/StatusCheck';
 
@@ -37,16 +35,6 @@ function App() {
                   <ProtectedRoute>
                     <Layout>
                       <Dashboard />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/transactions"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <Transactions />
                     </Layout>
                   </ProtectedRoute>
                 }

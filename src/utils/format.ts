@@ -25,7 +25,11 @@ export const formatDateShort = (dateString: string): string => {
   }
 };
 
-export const getStatusColor = (status: string): string => {
+export const getStatusColor = (status: string | undefined | null): string => {
+  if (!status) {
+    return 'text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-900';
+  }
+  
   switch (status.toLowerCase()) {
     case 'success':
       return 'text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900';
@@ -33,14 +37,16 @@ export const getStatusColor = (status: string): string => {
       return 'text-yellow-600 bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-900';
     case 'failed':
       return 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900';
-    case 'cancelled':
-      return 'text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-900';
     default:
       return 'text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-900';
   }
 };
 
-export const getGatewayColor = (gateway: string): string => {
+export const getGatewayColor = (gateway: string | undefined | null): string => {
+  if (!gateway) {
+    return 'text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-900';
+  }
+  
   switch (gateway.toLowerCase()) {
     case 'phonepe':
       return 'text-purple-600 bg-purple-100 dark:text-purple-400 dark:bg-purple-900';

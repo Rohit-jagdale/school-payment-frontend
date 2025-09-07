@@ -44,8 +44,6 @@ const StatusCheck: React.FC = () => {
         return <ClockIcon className="h-8 w-8 text-yellow-500" />;
       case 'failed':
         return <XCircleIcon className="h-8 w-8 text-red-500" />;
-      case 'cancelled':
-        return <ExclamationTriangleIcon className="h-8 w-8 text-gray-500" />;
       default:
         return <ClockIcon className="h-8 w-8 text-gray-500" />;
     }

@@ -4,7 +4,7 @@ export interface Transaction {
   gateway: string;
   order_amount: number;
   transaction_amount: number;
-  status: 'pending' | 'success' | 'failed' | 'cancelled';
+  status: 'Pending' | 'Success' | 'Failed';
   custom_order_id: string;
   payment_time?: string;
   payment_mode?: string;

@@ -157,7 +157,7 @@ The frontend automatically connects to the backend API. Make sure the backend is
 
 - **Complete List** - All transactions with pagination
 - **Advanced Filters**:
-  - Status (Success, Pending, Failed, Cancelled)
+  - Status (Success, Pending, Failed)
   - School ID selection
   - Date range filtering
   - Search by transaction ID
