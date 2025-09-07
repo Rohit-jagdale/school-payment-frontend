@@ -180,84 +180,55 @@ const Dashboard: React.FC = () => {
           <p className="text-gray-600 dark:text-gray-400 mt-1">Manage and view all payment transactions</p>
         </div>
 
-        {/* Filter Section - Matching the image layout */}
+        {/* Filter Section - Search, Date and Status Filter */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-          <div className="flex flex-wrap items-center gap-4">
-            {/* Search Input */}
-            <div className="flex-1 min-w-64">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            {/* Search Bar for School ID */}
+            <div className="relative flex-1 max-w-md">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                value={filters.search}
+                onChange={handleSearch}
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Search by School ID..."
+              />
+            </div>
+
+            <div className="flex flex-wrap items-center gap-4">
+              {/* Date Filter */}
               <div className="relative">
-                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <input
-                  type="text"
-                  placeholder="Search(Order ID...)"
-                  value={filters.search}
-                  onChange={handleSearch}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  type="date"
+                  value={filters.dateFrom}
+                  onChange={(e) => {
+                    const newFilters = { ...filters, dateFrom: e.target.value };
+                    setFilters(newFilters);
+                    setPagination({ ...pagination, currentPage: 1 });
+                    updateURLParams(newFilters, sort, { ...pagination, currentPage: 1 });
+                  }}
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-40"
+                  placeholder="Select date"
                 />
               </div>
-            </div>
 
-            {/* Rows per page */}
-            <div className="flex items-center gap-2">
-              <label className="text-sm text-gray-600 dark:text-gray-400">Rows per page:</label>
-              <select
-                value={rowsPerPage}
-                onChange={(e) => handleRowsPerPageChange(Number(e.target.value))}
-                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-              </select>
+              {/* Status Dropdown */}
+              <div className="relative">
+                <select
+                  value={selectedStatus}
+                  onChange={(e) => handleStatusFilterChange(e.target.value)}
+                  className="appearance-none px-4 py-2 pr-8 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-32"
+                >
+                  <option value="">Status</option>
+                  <option value="Success">Success</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Failed">Failed</option>
+                </select>
+                <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+              </div>
             </div>
-
-            {/* Filter By Dropdown */}
-            <div className="relative">
-              <select
-                value={selectedFilter}
-                onChange={(e) => handleFilterByChange(e.target.value)}
-                className="appearance-none px-4 py-2 pr-8 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-32"
-              >
-                <option value="">Filter By</option>
-                <option value="amount">Amount</option>
-                <option value="date">Date</option>
-                <option value="gateway">Gateway</option>
-              </select>
-              <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-            </div>
-
-            {/* Date Dropdown */}
-            <div className="relative">
-              <select
-                value={selectedDate}
-                onChange={(e) => handleDateFilterChange(e.target.value)}
-                className="appearance-none px-4 py-2 pr-8 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-32"
-              >
-                <option value="">Date</option>
-                <option value="today">Today</option>
-                <option value="yesterday">Yesterday</option>
-                <option value="week">This Week</option>
-                <option value="month">This Month</option>
-              </select>
-              <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-            </div>
-
-            {/* Status Dropdown */}
-            <div className="relative">
-              <select
-                value={selectedStatus}
-                onChange={(e) => handleStatusFilterChange(e.target.value)}
-                className="appearance-none px-4 py-2 pr-8 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-32"
-              >
-                <option value="">Status</option>
-                <option value="Success">Success</option>
-                <option value="Pending">Pending</option>
-                <option value="Failed">Failed</option>
-              </select>
-              <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-            </div>
-
           </div>
         </div>
 
