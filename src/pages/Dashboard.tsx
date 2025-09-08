@@ -42,9 +42,7 @@ const Dashboard: React.FC = () => {
     direction: (searchParams.get('sortDirection') as 'asc' | 'desc') || 'desc',
   });
   
-  const [rowsPerPage, setRowsPerPage] = useState(parseInt(searchParams.get('limit') || '10'));
-  const [selectedFilter, setSelectedFilter] = useState(searchParams.get('filterBy') || '');
-  const [selectedDate, setSelectedDate] = useState(searchParams.get('dateFilter') || '');
+  const rowsPerPage = parseInt(searchParams.get('limit') || '10');
   const [selectedStatus, setSelectedStatus] = useState(searchParams.get('status') || '');
 
 
@@ -63,8 +61,6 @@ const Dashboard: React.FC = () => {
     if (newSort.direction) params.set('sortDirection', newSort.direction);
     if (newPagination.currentPage > 1) params.set('page', newPagination.currentPage.toString());
     if (rowsPerPage !== 10) params.set('limit', rowsPerPage.toString());
-    if (selectedFilter) params.set('filterBy', selectedFilter);
-    if (selectedDate) params.set('dateFilter', selectedDate);
     
     setSearchParams(params);
   };
@@ -119,22 +115,6 @@ const Dashboard: React.FC = () => {
     updateURLParams(filters, newSort, pagination);
   };
 
-  const handleRowsPerPageChange = (newRowsPerPage: number) => {
-    setRowsPerPage(newRowsPerPage);
-    setPagination({ ...pagination, currentPage: 1 });
-    updateURLParams(filters, sort, { ...pagination, currentPage: 1 });
-  };
-
-  const handleFilterByChange = (filterBy: string) => {
-    setSelectedFilter(filterBy);
-    updateURLParams(filters, sort, pagination);
-  };
-
-  const handleDateFilterChange = (dateFilter: string) => {
-    setSelectedDate(dateFilter);
-    // Apply date filtering logic here
-    updateURLParams(filters, sort, pagination);
-  };
 
   const handleStatusFilterChange = (statusFilter: string) => {
     setSelectedStatus(statusFilter);
