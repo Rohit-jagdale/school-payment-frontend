@@ -15,6 +15,7 @@ const Register: React.FC = () => {
     school_id: '65b0e6293e9f76a9694d84b4',
   });
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const { register } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
@@ -24,13 +25,48 @@ const Register: React.FC = () => {
       ...formData,
       [e.target.name]: e.target.value,
     });
+    // Clear error when user starts typing
+    if (errors[e.target.name]) {
+      setErrors({
+        ...errors,
+        [e.target.name]: '',
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
     
-    if (formData.password !== formData.confirmPassword) {
-      toast.error('Passwords do not match');
+    // Client-side validation
+    const newErrors: { [key: string]: string } = {};
+    
+    if (!formData.username.trim()) {
+      newErrors.username = 'Username is required';
+    } else if (formData.username.trim().length < 3) {
+      newErrors.username = 'Username must be at least 3 characters long';
+    }
+    
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+    
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters long';
+    }
+    
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = 'Please confirm your password';
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
@@ -47,7 +83,24 @@ const Register: React.FC = () => {
       toast.success('Registration successful!');
       navigate('/');
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Registration failed');
+      console.error('Registration error:', error);
+      
+      // Handle specific error messages from backend
+      let errorMessage = 'Registration failed. Please try again.';
+      
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.status === 409) {
+        errorMessage = 'An account with this email or username already exists';
+      } else if (error.response?.status === 400) {
+        errorMessage = 'Please fill in all required fields';
+      } else if (error.response?.status === 404) {
+        errorMessage = 'Service temporarily unavailable';
+      } else if (!error.response) {
+        errorMessage = 'Unable to connect to server. Please check your internet connection.';
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -94,9 +147,12 @@ const Register: React.FC = () => {
                   required
                   value={formData.username}
                   onChange={handleChange}
-                  className="input"
+                  className={`input ${errors.username ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
                   placeholder="Enter your username"
                 />
+                {errors.username && (
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.username}</p>
+                )}
               </div>
             </div>
 
@@ -113,9 +169,12 @@ const Register: React.FC = () => {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className="input"
+                  className={`input ${errors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
                   placeholder="Enter your email"
                 />
+                {errors.email && (
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email}</p>
+                )}
               </div>
             </div>
 
@@ -151,9 +210,12 @@ const Register: React.FC = () => {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="input"
+                  className={`input ${errors.password ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
                   placeholder="Enter your password"
                 />
+                {errors.password && (
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.password}</p>
+                )}
               </div>
             </div>
 
@@ -170,9 +232,12 @@ const Register: React.FC = () => {
                   required
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="input"
+                  className={`input ${errors.confirmPassword ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
                   placeholder="Confirm your password"
                 />
+                {errors.confirmPassword && (
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.confirmPassword}</p>
+                )}
               </div>
             </div>
 
