@@ -1,20 +1,72 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { 
   MagnifyingGlassIcon, 
   CheckCircleIcon, 
   XCircleIcon,
   ClockIcon,
-  ExclamationTriangleIcon
+  ChevronDownIcon
 } from '@heroicons/react/24/outline';
 import { transactionService } from '../services/api';
 import { formatCurrency, formatDate, getStatusColor, getGatewayColor } from '../utils/format';
 import toast from 'react-hot-toast';
 
 const StatusCheck: React.FC = () => {
-  const [orderId, setOrderId] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [orderId, setOrderId] = useState(searchParams.get('orderId') || '');
   const [loading, setLoading] = useState(false);
   const [transaction, setTransaction] = useState<any>(null);
   const [error, setError] = useState('');
+  const [availableOrderIds, setAvailableOrderIds] = useState<string[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [showAllDropdown, setShowAllDropdown] = useState(false);
+
+  // Update URL params when orderId changes
+  const updateURLParams = (newOrderId: string) => {
+    const params = new URLSearchParams();
+    if (newOrderId.trim()) {
+      params.set('orderId', newOrderId);
+    }
+    setSearchParams(params);
+  };
+
+  // Auto-search when orderId is present in URL on page load
+  useEffect(() => {
+    if (orderId.trim()) {
+      handleSearch(new Event('submit') as any);
+    }
+  }, []);
+
+  // Fetch available order IDs for suggestions
+  useEffect(() => {
+    const fetchAvailableOrderIds = async () => {
+      try {
+        const response = await transactionService.getAllTransactions(
+          { page: 1, limit: 1000 },
+          { field: 'payment_time', direction: 'desc' },
+          { }
+        );
+        const uniqueIds = Array.from(new Set((response.transactions || []).map((t: any) => t.custom_order_id).filter(Boolean)));
+        setAvailableOrderIds(uniqueIds);
+      } catch (e) {
+        // fail silently
+      }
+    };
+    fetchAvailableOrderIds();
+  }, []);
+
+  // Close dropdowns when clicking outside the search container
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.status-search-container')) {
+        setShowDropdown(false);
+        setShowAllDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,6 +74,8 @@ const StatusCheck: React.FC = () => {
       toast.error('Please enter a transaction ID');
       return;
     }
+
+    updateURLParams(orderId);
 
     try {
       setLoading(true);
@@ -34,6 +88,13 @@ const StatusCheck: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleOrderIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newOrderId = e.target.value;
+    setOrderId(newOrderId);
+    updateURLParams(newOrderId);
+    setShowDropdown(newOrderId.trim().length > 0);
   };
 
   const getStatusIcon = (status: string) => {
@@ -67,16 +128,58 @@ const StatusCheck: React.FC = () => {
               Transaction ID
             </label>
             <div className="flex space-x-4">
-              <div className="flex-1 relative">
+              <div className="flex-1 relative status-search-container">
                 <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <input
                   id="order-id"
                   type="text"
                   value={orderId}
-                  onChange={(e) => setOrderId(e.target.value)}
+                  onChange={handleOrderIdChange}
+                  onFocus={() => setShowDropdown((orderId || '').length > 0)}
+                  onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
                   placeholder="Enter transaction ID (e.g., ORDER_001)"
-                  className="input pl-10"
+                  className="input pl-10 pr-10"
                 />
+                {/* Down Arrow Button */}
+                <button
+                  type="button"
+                  onClick={() => setShowAllDropdown(!showAllDropdown)}
+                  className="absolute inset-y-0 right-2 flex items-center"
+                >
+                  <ChevronDownIcon className="h-4 w-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" />
+                </button>
+
+                {/* Filtered Order IDs */}
+                {showDropdown && availableOrderIds.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    {availableOrderIds
+                      .filter(id => id.toLowerCase().includes((orderId || '').toLowerCase()))
+                      .map((id) => (
+                        <button
+                          key={id}
+                          onClick={() => { setOrderId(id); updateURLParams(id); setShowDropdown(false); setShowAllDropdown(false); }}
+                          className="w-full px-4 py-2 text-left text-sm text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 focus:bg-gray-100 dark:focus:bg-gray-600 focus:outline-none"
+                        >
+                          {id}
+                        </button>
+                      ))}
+                  </div>
+                )}
+
+                {/* All Order IDs */}
+                {showAllDropdown && availableOrderIds.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    {availableOrderIds.map((id) => (
+                      <button
+                        key={id}
+                        onClick={() => { setOrderId(id); updateURLParams(id); setShowDropdown(false); setShowAllDropdown(false); }}
+                        className="w-full px-4 py-2 text-left text-sm text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 focus:bg-gray-100 dark:focus:bg-gray-600 focus:outline-none"
+                      >
+                        {id}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               <button
                 type="submit"

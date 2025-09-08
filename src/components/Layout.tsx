@@ -3,11 +3,11 @@ import type { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   HomeIcon, 
-  BuildingOfficeIcon, 
   MagnifyingGlassIcon,
   SunIcon,
   MoonIcon,
-  ArrowRightOnRectangleIcon
+  ArrowRightOnRectangleIcon,
+  BanknotesIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -23,8 +23,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: HomeIcon },
-    { name: 'By School', href: '/transactions/school', icon: BuildingOfficeIcon },
     { name: 'Status Check', href: '/status-check', icon: MagnifyingGlassIcon },
+    { name: 'School Transactions', href: '/school-transactions', icon: BanknotesIcon },
   ];
 
   return (

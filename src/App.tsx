@@ -7,8 +7,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
-import SchoolTransactions from './pages/SchoolTransactions';
 import StatusCheck from './pages/StatusCheck';
+import TransactionDetails from './pages/TransactionDetails';
 
 function App() {
   return (
@@ -40,21 +40,21 @@ function App() {
                 }
               />
               <Route
-                path="/transactions/school"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <SchoolTransactions />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
                 path="/status-check"
                 element={
                   <ProtectedRoute>
                     <Layout>
                       <StatusCheck />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/school-transactions"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <TransactionDetails />
                     </Layout>
                   </ProtectedRoute>
                 }
