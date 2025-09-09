@@ -13,7 +13,6 @@ const TransactionDetails: React.FC = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showAllDropdown, setShowAllDropdown] = useState(false);
   
-  // Pagination state
   const [pagination, setPagination] = useState({
     currentPage: parseInt(searchParams.get('page') || '1'),
     totalPages: 1,
@@ -22,24 +21,20 @@ const TransactionDetails: React.FC = () => {
     hasPrevPage: false
   });
 
-  // Initialize filters from URL params
   const [filters, setFilters] = useState<FilterOptions>({
     search: searchParams.get('search') || ''
   });
 
-  // Sort state
   const [sort] = useState<SortOptions>({
     field: 'payment_time',
     direction: 'desc'
   });
 
-  // Pagination options
   const [paginationOptions] = useState<PaginationOptions>({
     page: 1,
     limit: 10
   });
 
-  // Update URL params when filters change
   const updateURLParams = (newFilters: FilterOptions, newPagination: any) => {
     const params = new URLSearchParams();
     
@@ -50,7 +45,6 @@ const TransactionDetails: React.FC = () => {
   };
 
   const fetchTransactions = async () => {
-    // Do not fetch until user enters a search term
     if (!filters.search || (filters.search || '').trim() === '') {
       setTransactions([]);
       setPagination({
@@ -87,14 +81,12 @@ const TransactionDetails: React.FC = () => {
 
   const fetchAvailableSchoolIds = async () => {
     try {
-      // Fetch all transactions to get unique school IDs
       const response: TransactionResponse = await transactionService.getAllTransactions(
-        { page: 1, limit: 1000 }, // Get a large number to fetch all school IDs
+        { page: 1, limit: 1000 },
         sort,
-        { search: '' } // Empty search to get all records
+        { search: '' }
       );
       
-      // Extract unique school IDs
       const uniqueSchoolIds = [...new Set(response.transactions.map(t => t.school_id))];
       setAvailableSchoolIds(uniqueSchoolIds);
     } catch (err) {
@@ -110,7 +102,6 @@ const TransactionDetails: React.FC = () => {
     fetchAvailableSchoolIds();
   }, []);
 
-  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -148,7 +139,6 @@ const TransactionDetails: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="md:flex md:items-center md:justify-between">
         <div className="min-w-0 flex-1">
           <h2 className="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:truncate sm:text-3xl sm:tracking-tight">
@@ -160,7 +150,6 @@ const TransactionDetails: React.FC = () => {
         </div>
       </div>
 
-      {/* Search Transactions */}
       <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
         <div className="relative max-w-md search-container">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -176,7 +165,6 @@ const TransactionDetails: React.FC = () => {
             className="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
           
-          {/* Down Arrow Button */}
           <button
             type="button"
             onClick={() => setShowAllDropdown(!showAllDropdown)}
@@ -185,7 +173,6 @@ const TransactionDetails: React.FC = () => {
             <ChevronDownIcon className="h-5 w-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" />
           </button>
           
-          {/* Filtered School ID Dropdown (while typing) */}
           {showDropdown && availableSchoolIds.length > 0 && (
             <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
               {availableSchoolIds
@@ -205,7 +192,6 @@ const TransactionDetails: React.FC = () => {
             </div>
           )}
           
-          {/* All School IDs Dropdown (when clicking arrow) */}
           {showAllDropdown && availableSchoolIds.length > 0 && (
             <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
               {availableSchoolIds.map((schoolId) => (
@@ -222,10 +208,8 @@ const TransactionDetails: React.FC = () => {
         </div>
       </div>
 
-      {/* Results */}
       {Boolean((filters.search || '').trim()) && (
       <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
-        {/* Results Header */}
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white">
@@ -245,7 +229,6 @@ const TransactionDetails: React.FC = () => {
           </div>
         </div>
 
-        {/* Error Message */}
         {error && (
           <div className="px-6 py-4">
             <div className="rounded-md bg-red-50 dark:bg-red-900 p-4">
@@ -254,7 +237,6 @@ const TransactionDetails: React.FC = () => {
           </div>
         )}
 
-        {/* Transactions Table */}
         {!loading && !error && (
           <>
             {transactions.length === 0 ? (

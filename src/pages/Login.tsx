@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
-import toast from 'react-hot-toast';
+import { toast } from 'react-toastify';
 
 const Login: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -21,7 +21,6 @@ const Login: React.FC = () => {
       ...formData,
       [e.target.name]: e.target.value,
     });
-    // Clear error when user starts typing
     if (errors[e.target.name]) {
       setErrors({
         ...errors,
@@ -35,7 +34,6 @@ const Login: React.FC = () => {
     setLoading(true);
     setErrors({});
 
-    // Client-side validation
     const newErrors: { [key: string]: string } = {};
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
@@ -59,7 +57,6 @@ const Login: React.FC = () => {
     } catch (error: any) {
       console.error('Login error:', error);
       
-      // Handle specific error messages from backend
       let errorMessage = 'Login failed. Please try again.';
       
       if (error.response?.data?.message) {
@@ -82,11 +79,10 @@ const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      {/* Theme toggle */}
       <div className="absolute top-4 right-4">
         <button
           onClick={toggleTheme}
-          className="p-2 text-gray-400 hover:text-gray-500 dark:text-gray-300 dark:hover:text-gray-200"
+          className="p-2 text-gray-400 hover:text-gray-500 dark:text-gray-300 dark:hover:text-gray-200 rounded-full border border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
         >
           {isDark ? (
             <SunIcon className="h-6 w-6" />

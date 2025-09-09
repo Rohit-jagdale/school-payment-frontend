@@ -10,9 +10,9 @@ import {
   DocumentDuplicateIcon
 } from '@heroicons/react/24/outline';
 import { transactionService } from '../services/api';
-import type { Transaction, FilterOptions, SortOptions } from '../types';
+import type { Transaction, FilterOptions, SortOptions, TransactionResponse } from '../types';
 import { formatCurrency, getStatusColor } from '../utils/format';
-import toast from 'react-hot-toast';
+import { toast } from 'react-toastify';
 
 
 const Dashboard: React.FC = () => {
@@ -20,6 +20,9 @@ const Dashboard: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [availableSchoolIds, setAvailableSchoolIds] = useState<string[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [showAllDropdown, setShowAllDropdown] = useState(false);
   const [pagination, setPagination] = useState({
     currentPage: parseInt(searchParams.get('page') || '1'),
     totalPages: 1,
@@ -28,7 +31,6 @@ const Dashboard: React.FC = () => {
     hasPrevPage: false,
   });
   
-  // Initialize filters from URL params
   const [filters, setFilters] = useState<FilterOptions>({
     status: searchParams.get('status')?.split(',') || [],
     schoolIds: searchParams.get('schoolIds')?.split(',') || [],
@@ -42,11 +44,10 @@ const Dashboard: React.FC = () => {
     direction: (searchParams.get('sortDirection') as 'asc' | 'desc') || 'desc',
   });
   
-  const rowsPerPage = parseInt(searchParams.get('limit') || '10');
+  const [rowsPerPage, setRowsPerPage] = useState(parseInt(searchParams.get('limit') || '10'));
   const [selectedStatus, setSelectedStatus] = useState(searchParams.get('status') || '');
 
 
-  // Update URL params when filters change
   const updateURLParams = (newFilters: FilterOptions, newSort: SortOptions, newPagination: any) => {
     const params = new URLSearchParams();
     
@@ -65,10 +66,28 @@ const Dashboard: React.FC = () => {
     setSearchParams(params);
   };
 
-  // Load transactions when component mounts or dependencies change
   useEffect(() => {
     loadTransactions();
   }, [pagination.currentPage, sort, filters, rowsPerPage]);
+
+  useEffect(() => {
+    fetchAvailableSchoolIds();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.search-container')) {
+        setShowDropdown(false);
+        setShowAllDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const loadTransactions = async () => {
     try {
@@ -99,11 +118,39 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const fetchAvailableSchoolIds = async () => {
+    try {
+      const response: TransactionResponse = await transactionService.getAllTransactions(
+        { page: 1, limit: 1000 },
+        sort,
+        { search: '' }
+      );
+      
+      const uniqueSchoolIds = [...new Set(response.transactions.map(t => t.school_id))];
+      setAvailableSchoolIds(uniqueSchoolIds);
+    } catch (err) {
+      console.error('Failed to fetch school IDs:', err);
+    }
+  };
+
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newFilters = { ...filters, search: e.target.value };
+    const searchValue = e.target.value;
+    const newFilters = { ...filters, search: searchValue };
+    const newPagination = { ...pagination, currentPage: 1 };
     setFilters(newFilters);
-    setPagination({ ...pagination, currentPage: 1 });
-    updateURLParams(newFilters, sort, { ...pagination, currentPage: 1 });
+    setPagination(newPagination);
+    setShowDropdown(searchValue.length > 0);
+    updateURLParams(newFilters, sort, newPagination);
+  };
+
+  const handleSchoolIdSelect = (schoolId: string) => {
+    const newFilters = { ...filters, search: schoolId };
+    const newPagination = { ...pagination, currentPage: 1 };
+    setFilters(newFilters);
+    setPagination(newPagination);
+    setShowDropdown(false);
+    setShowAllDropdown(false);
+    updateURLParams(newFilters, sort, newPagination);
   };
 
   const handleSort = (field: string) => {
@@ -126,6 +173,41 @@ const Dashboard: React.FC = () => {
     setFilters(newFilters);
     setPagination(newPagination);
     updateURLParams(newFilters, sort, newPagination);
+  };
+
+  const handleRowsPerPageChange = (newRowsPerPage: number) => {
+    setRowsPerPage(newRowsPerPage);
+    const newPagination = { ...pagination, currentPage: 1 };
+    setPagination(newPagination);
+    updateURLParams(filters, sort, newPagination);
+  };
+
+  const handleResetFilters = () => {
+    const defaultFilters: FilterOptions = {
+      status: [],
+      schoolIds: [],
+      search: '',
+      dateFrom: '',
+      dateTo: '',
+    };
+    const defaultSort: SortOptions = {
+      field: 'payment_time',
+      direction: 'desc',
+    };
+    const defaultPagination = {
+      currentPage: 1,
+      totalPages: 1,
+      totalCount: 0,
+      hasNextPage: false,
+      hasPrevPage: false,
+    };
+    
+    setFilters(defaultFilters);
+    setSort(defaultSort);
+    setPagination(defaultPagination);
+    setSelectedStatus('');
+    setRowsPerPage(10);
+    updateURLParams(defaultFilters, defaultSort, defaultPagination);
   };
 
 
@@ -154,17 +236,14 @@ const Dashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Transactions</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">Manage and view all payment transactions</p>
         </div>
 
-        {/* Filter Section - Search, Date and Status Filter */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
-            {/* Search Bar for School ID */}
-            <div className="relative flex-1 max-w-md">
+            <div className="relative flex-1 max-w-md search-container">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
               </div>
@@ -172,13 +251,55 @@ const Dashboard: React.FC = () => {
                 type="text"
                 value={filters.search}
                 onChange={handleSearch}
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                onFocus={() => setShowDropdown((filters.search || '').length > 0)}
+                onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+                className="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Search by School ID..."
               />
+              
+              <button
+                type="button"
+                onClick={() => setShowAllDropdown(!showAllDropdown)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+              >
+                <ChevronDownIcon className="h-5 w-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" />
+              </button>
+              
+              {showDropdown && availableSchoolIds.length > 0 && (
+                <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  {availableSchoolIds
+                    .filter(schoolId => 
+                      schoolId.toLowerCase().includes((filters.search || '').toLowerCase())
+                    )
+                    .map((schoolId) => (
+                      <button
+                        key={schoolId}
+                        onClick={() => handleSchoolIdSelect(schoolId)}
+                        className="w-full px-4 py-2 text-left text-sm text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 focus:bg-gray-100 dark:focus:bg-gray-600 focus:outline-none"
+                      >
+                        {schoolId}
+                      </button>
+                    ))
+                  }
+                </div>
+              )}
+              
+              {showAllDropdown && availableSchoolIds.length > 0 && (
+                <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  {availableSchoolIds.map((schoolId) => (
+                    <button
+                      key={schoolId}
+                      onClick={() => handleSchoolIdSelect(schoolId)}
+                      className="w-full px-4 py-2 text-left text-sm text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 focus:bg-gray-100 dark:focus:bg-gray-600 focus:outline-none"
+                    >
+                      {schoolId}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="flex flex-wrap items-center gap-4">
-              {/* Date Filter */}
               <div className="relative">
                 <input
                   type="date"
@@ -194,7 +315,6 @@ const Dashboard: React.FC = () => {
                 />
               </div>
 
-              {/* Status Dropdown */}
               <div className="relative">
                 <select
                   value={selectedStatus}
@@ -208,11 +328,47 @@ const Dashboard: React.FC = () => {
                 </select>
                 <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
               </div>
+
+              <div className="relative">
+                <select
+                  value={sort.direction}
+                  onChange={(e) => {
+                    const newSort = { ...sort, direction: e.target.value as 'asc' | 'desc' };
+                    setSort(newSort);
+                    updateURLParams(filters, newSort, pagination);
+                  }}
+                  className="appearance-none px-4 py-2 pr-8 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-24"
+                >
+                  <option value="desc">Descending</option>
+                  <option value="asc">Ascending</option>
+                </select>
+                <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+              </div>
+
+              <div className="relative">
+                <select
+                  value={rowsPerPage}
+                  onChange={(e) => handleRowsPerPageChange(parseInt(e.target.value))}
+                  className="appearance-none px-4 py-2 pr-8 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-20"
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={30}>30</option>
+                  <option value={50}>50</option>
+                </select>
+                <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+              </div>
+
+              <button
+                onClick={handleResetFilters}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 font-medium"
+              >
+                Reset
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Error Display */}
         {error && (
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
             <div className="flex">
@@ -239,7 +395,6 @@ const Dashboard: React.FC = () => {
           </div>
         )}
 
-        {/* Transactions Table - Matching the image structure */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center h-64">
@@ -330,7 +485,6 @@ const Dashboard: React.FC = () => {
           )}
         </div>
 
-        {/* Pagination */}
         {pagination.totalPages > 1 && (
           <div className="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between sm:px-6">
             <div className="flex-1 flex justify-between sm:hidden">

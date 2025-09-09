@@ -9,7 +9,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { transactionService } from '../services/api';
 import { formatCurrency, formatDate, getStatusColor, getGatewayColor } from '../utils/format';
-import toast from 'react-hot-toast';
+import { toast } from 'react-toastify';
 
 const StatusCheck: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -21,7 +21,6 @@ const StatusCheck: React.FC = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showAllDropdown, setShowAllDropdown] = useState(false);
 
-  // Update URL params when orderId changes
   const updateURLParams = (newOrderId: string) => {
     const params = new URLSearchParams();
     if (newOrderId.trim()) {
@@ -30,14 +29,12 @@ const StatusCheck: React.FC = () => {
     setSearchParams(params);
   };
 
-  // Auto-search when orderId is present in URL on page load
   useEffect(() => {
     if (orderId.trim()) {
       handleSearch(new Event('submit') as any);
     }
   }, []);
 
-  // Fetch available order IDs for suggestions
   useEffect(() => {
     const fetchAvailableOrderIds = async () => {
       try {
@@ -49,13 +46,11 @@ const StatusCheck: React.FC = () => {
         const uniqueIds = Array.from(new Set((response.transactions || []).map((t: any) => t.custom_order_id).filter(Boolean)));
         setAvailableOrderIds(uniqueIds);
       } catch (e) {
-        // fail silently
       }
     };
     fetchAvailableOrderIds();
   }, []);
 
-  // Close dropdowns when clicking outside the search container
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -112,7 +107,6 @@ const StatusCheck: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Transaction Status Check</h1>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -120,7 +114,6 @@ const StatusCheck: React.FC = () => {
         </p>
       </div>
 
-      {/* Search Form */}
       <div className="card p-6">
         <form onSubmit={handleSearch} className="space-y-4">
           <div>
@@ -140,7 +133,6 @@ const StatusCheck: React.FC = () => {
                   placeholder="Enter transaction ID (e.g., ORDER_001)"
                   className="input pl-10 pr-10"
                 />
-                {/* Down Arrow Button */}
                 <button
                   type="button"
                   onClick={() => setShowAllDropdown(!showAllDropdown)}
@@ -149,7 +141,6 @@ const StatusCheck: React.FC = () => {
                   <ChevronDownIcon className="h-4 w-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" />
                 </button>
 
-                {/* Filtered Order IDs */}
                 {showDropdown && availableOrderIds.length > 0 && (
                   <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                     {availableOrderIds
@@ -166,7 +157,6 @@ const StatusCheck: React.FC = () => {
                   </div>
                 )}
 
-                {/* All Order IDs */}
                 {showAllDropdown && availableOrderIds.length > 0 && (
                   <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                     {availableOrderIds.map((id) => (
@@ -193,7 +183,6 @@ const StatusCheck: React.FC = () => {
         </form>
       </div>
 
-      {/* Results */}
       {error && (
         <div className="card p-6">
           <div className="flex items-center space-x-3">
@@ -208,7 +197,6 @@ const StatusCheck: React.FC = () => {
 
       {transaction && (
         <div className="space-y-6">
-          {/* Transaction Status Card */}
           <div className="card p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
@@ -230,9 +218,7 @@ const StatusCheck: React.FC = () => {
             </div>
           </div>
 
-          {/* Transaction Details */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Basic Information */}
             <div className="card p-6">
               <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
                 Transaction Details
@@ -265,7 +251,6 @@ const StatusCheck: React.FC = () => {
               </dl>
             </div>
 
-            {/* Financial Information */}
             <div className="card p-6">
               <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
                 Financial Details
@@ -307,7 +292,6 @@ const StatusCheck: React.FC = () => {
             </div>
           </div>
 
-          {/* Student Information */}
           {transaction.student_info && (
             <div className="card p-6">
               <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
@@ -332,7 +316,6 @@ const StatusCheck: React.FC = () => {
         </div>
       )}
 
-      {/* Help Text */}
       <div className="card p-6 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
         <div className="flex">
           <div className="flex-shrink-0">
