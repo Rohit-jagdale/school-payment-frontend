@@ -11,7 +11,6 @@ A modern, responsive React frontend for the School Payment and Dashboard applica
 
 ### 🎨 **Modern UI/UX**
 
-- **Responsive Design** - Works on desktop, tablet, and mobile
 - **Dark Mode Support** - Toggle between light and dark themes
 - **Modern Design** - Clean, professional interface with Tailwind CSS
 - **Interactive Components** - Smooth animations and transitions
@@ -49,7 +48,6 @@ A modern, responsive React frontend for the School Payment and Dashboard applica
 - **Individual Transaction Lookup** - Search by transaction ID
 - **Detailed Transaction View** - Complete transaction information
 - **Status Tracking** - Real-time status updates
-- **Student Information** - Associated student details
 
 ## 🛠️ Tech Stack
 
@@ -60,34 +58,38 @@ A modern, responsive React frontend for the School Payment and Dashboard applica
 - **Routing**: React Router DOM
 - **HTTP Client**: Axios
 - **Icons**: Heroicons
-- **Notifications**: React Hot Toast
+- **Notifications**: react-toastify
 - **Date Handling**: date-fns
 
 ## 📁 Project Structure
 
 ```
 src/
-├── components/          # Reusable UI components
-│   ├── Layout.tsx      # Main layout with sidebar
+├── assets/             # Static assets
+│   └── react.svg      # React logo
+├── components/         # Reusable UI components
+│   ├── Layout.tsx     # Main layout with sidebar
 │   └── ProtectedRoute.tsx # Route protection wrapper
-├── context/            # React Context providers
+├── context/           # React Context providers
 │   ├── AuthContext.tsx # Authentication state
 │   └── ThemeContext.tsx # Dark mode state
-├── pages/              # Page components
-│   ├── Dashboard.tsx   # Main dashboard
-│   ├── Login.tsx       # Login page
-│   ├── Register.tsx    # Registration page
-│   ├── Transactions.tsx # All transactions
-│   ├── SchoolTransactions.tsx # School-specific transactions
-│   └── StatusCheck.tsx # Transaction status lookup
-├── services/           # API services
-│   └── api.ts         # Axios configuration and API calls
-├── types/              # TypeScript type definitions
-│   └── index.ts       # All type definitions
-├── utils/              # Utility functions
-│   └── format.ts      # Formatting helpers
-├── App.tsx            # Main app component
-└── main.tsx           # Application entry point
+├── pages/             # Page components
+│   ├── Dashboard.tsx  # Main dashboard
+│   ├── Login.tsx      # Login page
+│   ├── Register.tsx   # Registration page
+│   ├── StatusCheck.tsx # Transaction status lookup
+│   └── TransactionDetails.tsx # Individual transaction details
+├── services/          # API services
+│   └── api.ts        # Axios configuration and API calls
+├── types/             # TypeScript type definitions
+│   └── index.ts      # All type definitions
+├── utils/             # Utility functions
+│   └── format.ts     # Formatting helpers
+├── App.tsx           # Main app component
+├── App.css           # App-specific styles
+├── index.css         # Global styles
+├── main.tsx          # Application entry point
+└── vite-env.d.ts     # Vite environment types
 ```
 
 ## 🚀 Getting Started
@@ -218,44 +220,6 @@ The application includes a complete dark mode implementation:
 5. **Protected Routes** - Automatic redirects
 6. **Logout** - Clear tokens and redirect
 
-## 📊 Data Management
-
-### **State Management**
-
-- **React Context** - Global state management
-- **Local State** - Component-level state
-- **URL State** - Filters persist in URL
-- **Cache Management** - Efficient data fetching
-
-### **API Integration**
-
-- **Axios Configuration** - Centralized HTTP client
-- **Request Interceptors** - Automatic auth headers
-- **Response Interceptors** - Error handling
-- **Type Safety** - Full TypeScript integration
-
-## 🎯 Key Features
-
-### **Real-time Data**
-
-- **Live Updates** - Fresh data from backend
-- **Auto-refresh** - Periodic data updates
-- **Error Handling** - Graceful error states
-- **Loading States** - User feedback during operations
-
-### **User Experience**
-
-- **Responsive Design** - Works on all devices
-- **Fast Navigation** - Smooth page transitions
-- **Intuitive Interface** - Easy to use design
-- **Accessibility** - Keyboard navigation support
-
-### **Performance**
-
-- **Code Splitting** - Lazy loading of components
-- **Optimized Bundles** - Vite's fast builds
-- **Efficient Rendering** - React best practices
-- **Caching** - Smart data caching
 
 ## 🚀 Deployment
 
@@ -277,26 +241,6 @@ npm run preview
 2. Set environment variables
 3. Deploy automatically
 
-## 🧪 Testing
-
-### **Run Tests**
-
-```bash
-npm run test
-```
-
-### **Type Checking**
-
-```bash
-npm run type-check
-```
-
-### **Linting**
-
-```bash
-npm run lint
-```
-
 ## 📝 Available Scripts
 
 - `npm run dev` - Start development server
@@ -305,40 +249,3 @@ npm run lint
 - `npm run type-check` - Run TypeScript checks
 - `npm run lint` - Run ESLint
 
-## 🔧 Customization
-
-### **Theming**
-
-- Modify `tailwind.config.js` for custom colors
-- Update CSS variables in `index.css`
-- Customize component styles
-
-### **API Integration**
-
-- Update `services/api.ts` for different endpoints
-- Modify types in `types/index.ts`
-- Add new API calls as needed
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
-## 🆘 Support
-
-For support and questions:
-
-- Check the documentation
-- Review the code comments
-- Open an issue on GitHub
-
----
-
-**Built with ❤️ using React, TypeScript, and Tailwind CSS**
